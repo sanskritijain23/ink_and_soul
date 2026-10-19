@@ -8,7 +8,7 @@ export default {
     extend: {
       colors: {
         sage: {
-          DEFAULT: '3E7EDE2',
+          DEFAULT: '#E7EDE2',
           dark: "#A3B39A",
           ink: "#344638",
         },
@@ -18,7 +18,7 @@ export default {
           border: "#E5E0D4",
         },
         ink: {
-          DEFAULT: "39382E",
+          DEFAULT: "#39382E",
           muted: "#777568",
           brown: "#665F50",
         },
@@ -26,7 +26,7 @@ export default {
           DEFAULT: "#B47A70",
         },
       },
-      FontFamily: {
+      fontFamily: {
         display: ["Cormorant Garamond", "serif"],
         sans: ["DM Sans", "sans-serif"],
         reading: ["Lora", "serif"],

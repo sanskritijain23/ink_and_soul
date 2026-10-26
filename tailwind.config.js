@@ -8,22 +8,26 @@ export default {
     extend: {
       colors: {
         sage: {
-          DEFAULT: '#E7EDE2',
-          dark: "#A3B39A",
-          ink: "#344638",
+          DEFAULT: '#DDE7D8',
+          dark: "#A8B9A0",
+          ink: "#405847",
         },
         paper: {
-          DEFAULT: "#F8F5EC",
-          card: "#FFFDF7",
-          border: "#E5E0D4",
+          DEFAULT: "#F5F1E7",
+          card: "#FFFCF6",
+          border: "#E4DCCB",
         },
         ink: {
-          DEFAULT: "#39382E",
-          muted: "#777568",
-          brown: "#665F50",
+          DEFAULT: "#302F28",
+          muted: "#77776A",
+          brown: "#665C4F",
         },
         accent: {
-          DEFAULT: "#B47A70",
+          DEFAULT: "#B87968",
+        },
+        rose: {
+          DEFAULT: "#E8D4CB",
+          dark: "C99F91",
         },
       },
       fontFamily: {

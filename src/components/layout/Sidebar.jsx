@@ -18,7 +18,7 @@ function Sidebar () {
                         A space of one's own
                     </span>
                 </div>
-                <h2 className='font-display text-4xl font-medium tracking-tight text-ink'>
+                <h2 className='font-display text-4xl font-medium tracking-tight text-ink transition-colors duration-300 hover:text-sage-ink'>
                     Ink & Soul<span className='text-accent'>.</span>
                 </h2>
                 <p className='mt-2 font-reading text-sm italic text-ink-muted'>
@@ -38,14 +38,15 @@ function Sidebar () {
                         return (
                             <button 
                                key={item.label}
-                               className={`group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left font-sans text-sm transition-all duration-200 ${
+                               className={`group flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left font-sans text-sm transition-all duration-300 ${
                                 isActive
-                                ? 'bg-sage text-sage-ink font-medium'
-                                : 'text-ink-brown hover: bg-paper hover:text-ink'}`}>
+                                ? 'border-sage-dark/40 bg-sage text-sage-ink font-medium shadow-sm'
+                                : 'border-transparent text-ink-brown hover:border-paper-border hover:bg-paper hover:pl-4 hover:text-sage-ink'}`}>
                                     <Icon 
                                       size={18}
                                       strokeWidth={1.6}
-                                      className='shrink-0'
+                                      className={`shrink-0 transition-transform duration-300 ${
+                                      isActive ? 'text-sage-ink' : 'group-hover:scale-110' }`}
                                     />
                                     <span>{item.label}</span>
                                     {isActive && ( 
@@ -63,7 +64,7 @@ function Sidebar () {
                     "Some things are best understood when written down."
                 </p>
                 <p className='mt-3 font-sans text-[10px] uppercase tracking-[0.18em] text-ink-muted'>
-                    A gentle remainder
+                    A gentle reminder
                 </p>
             </div>
         </aside>

@@ -1,4 +1,5 @@
 import { BookOpen, Feather, House, Library, Quote, Sparkles } from 'lucide-react'
+import { NavLink } from 'react-router-dom'
 
 const navItems = [
     {label: 'Home', icon: House },
@@ -36,24 +37,38 @@ function Sidebar () {
                         const isActive = index === 0
 
                         return (
-                            <button 
-                               key={item.label}
-                               className={`group flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left font-sans text-sm transition-all duration-300 ${
+                            <NavLink
+                              key={item.label}
+                              to={index === 0
+                                ? '/'
+                                : index === 1
+                                ? '/writings'
+                                : '#'
+                              }
+                            className={({ isActive }) => `group flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left font-sans text-sm transition-all suration-300 ${
                                 isActive
                                 ? 'border-sage-dark/40 bg-sage text-sage-ink font-medium shadow-sm'
                                 : 'border-transparent text-ink-brown hover:border-paper-border hover:bg-paper hover:pl-4 hover:text-sage-ink'}`}>
-                                    <Icon 
-                                      size={18}
-                                      strokeWidth={1.6}
-                                      className={`shrink-0 transition-transform duration-300 ${
-                                      isActive ? 'text-sage-ink' : 'group-hover:scale-110' }`}
-                                    />
-                                    <span>{item.label}</span>
-                                    {isActive && ( 
-                                        <span className='ml-auto h-1.5 w-1.5 rounded-full bg-sage-ink' />
+                                    {({ isActive }) => {
+                                        const Icon = item.icon
+                                        return (
+                                            <>
+                                               <Icon
+                                                  size={18}
+                                                  strokeWidth={1.6}
+                                                  className={`shrink-0 transition-transform duration-300 ${
+                                                    isActive ? 'text-sage-ink' : 'group-hover:scale-110'}`}
+                                                    />
 
-                                    )}
-                                </button>
+                                                    <span>{item.label}</span>
+                                                    {isActive && (
+                                                        <span className='ml-auto h-1.5 w-1.5 rounded-full bg-sage-ink' />
+                                                        
+                                                    )}
+                                            </>
+                                        )
+                                    }}
+                                </NavLink>
                         )
                     })}
                 </div>

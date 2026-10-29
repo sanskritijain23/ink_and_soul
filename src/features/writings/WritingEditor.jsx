@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
-import { ArrowLeft, Feather, Save, Plus } from 'lucide-react'
+import { act, useEffect, useState } from "react";
+import { ArrowLeft, Feather, Save, Plus, Trash2 } from 'lucide-react'
 import {
     addRecord,
     getAllRecords,
     updateRecord,
+    deleteRecord,
 } from '../../services/db'
 
 function WritingEditor() {
@@ -93,6 +94,36 @@ function WritingEditor() {
         }
     }
 
+    async function handleDelete() {
+        if (!activeId) {
+            setMessage('Select a saved writing to delete.')
+            return
+        }
+
+        const confirmed = window.confirm(
+            'Are you sure you want to delete this writing?'
+        )
+
+        if (!confirmed) return 
+
+        try {
+            await deleteRecord('writings', activeId)
+
+            setWritings((previousWritings) => 
+                previousWritings.filter(
+                    (writing) => writing.id !== activeId
+                )
+            )
+
+            startNewWriting()
+            setMessage('Writing deleted successfully.')
+        }
+        catch (error) {
+            console.error('Could not delete writing:', error)
+            setMessage('Could not delete. please try again')
+        }
+    }
+
     return (
         <div className="min-h-screen bg-paper px-6 py-10 md:px-10">
             <div className="mx-auto max-w-6xl">
@@ -145,6 +176,15 @@ function WritingEditor() {
                                         <Save size={16} />
                                         Save writing
                                         </button> 
+
+                                    {activeId && (
+                                        <button 
+                                           onClick={handleDelete}
+                                           className="flex items-center gap-2 rounded-xl border border-red-200 px-4 py-3 text-sm text-red-700 transition hover:bg-red-50">
+                                            <Trash2 size={16} />
+                                            Delete writing
+                                           </button>
+                                    )}
                                   </div>
 
                                   {message && (

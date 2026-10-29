@@ -1,13 +1,32 @@
+import { useEffect, useState } from "react";
 import { BookOpen, Feather, Quote, Sparkles } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
+import { getAllRecords } from "../../services/db";
 
-const stats = [
-    { label: 'Pieces written', value: '0', icon: Feather},
-    { label: 'Books explored', value: '0', icon: BookOpen},
-    { label: 'Quotes collected', value: '0', icon: Quote},
-]
 
 function Dashboard() {
+    const [writingsCount, setWritingsCount] = useState(0)
+
+    useEffect(() => {
+        async function loadWritingsCount() {
+            try {
+                const records = await getAllRecords('writings')
+                setWritingsCount(records.length)
+            }
+            catch (error) {
+                console.error('Could not load writing count:', error)
+            }
+        }
+        loadWritingsCount()
+
+    },[])
+
+    const stats = [
+        { label: 'Pieces written', value: writingsCount, icon: Feather },
+        { label: 'Books explored', value: 0, icon: BookOpen },
+        { label: 'Quotes collected', value: 0, icon: Quote },
+    ]
+
     return (
     <div className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-12">
         <PageHeader

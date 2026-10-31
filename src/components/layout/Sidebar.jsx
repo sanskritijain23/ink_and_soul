@@ -43,6 +43,8 @@ function Sidebar () {
                                 ? '/'
                                 : index === 1
                                 ? '/writings'
+                                : index === 2 
+                                ? '/reading-journal'
                                 : '#'
                               }
                             className={({ isActive }) => `group flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left font-sans text-sm transition-all suration-300 ${

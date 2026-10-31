@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import AppLayout from "./components/layout/AppLayout"
 import Dashboard from "./features/dashboard/Dashboard"
 import WritingEditor from "./features/writings/WritingEditor"
+import ReadingJournal from "./features/reading/ReadingJournal"
 
 function App() {
   return (
@@ -25,6 +26,15 @@ function App() {
           }
 
           />
+
+        <Route 
+          path="/reading-journal"
+          element={
+            <AppLayout>
+              <ReadingJournal />
+            </AppLayout>
+          }
+        />
        </Routes>
     </BrowserRouter>
   )

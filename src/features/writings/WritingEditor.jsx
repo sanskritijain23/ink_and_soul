@@ -1,4 +1,4 @@
-import { act, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Feather, Save, Plus, Trash2 } from 'lucide-react'
 import {
     addRecord,

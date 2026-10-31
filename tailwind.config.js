@@ -17,6 +17,21 @@ export default {
           card: "#FFFCF6",
           border: "#E4DCCB",
         },
+        forest: {
+          DEFAULT: "#293D32",
+          light: "#405D49",
+          dark: "#1D2C24",
+        },
+        clay: {
+          DEFAULT: "#D4A18A",
+          light: "#E5C0AD",
+          dark: "#B87968",
+        },
+        burgundy: {
+          DEFAULT: "#702D3B",
+          light: "#8D4B58",
+          dark: "#55212D",
+        },
         ink: {
           DEFAULT: "#302F28",
           muted: "#77776A",
@@ -27,7 +42,7 @@ export default {
         },
         rose: {
           DEFAULT: "#E8D4CB",
-          dark: "C99F91",
+          dark: "#C99F91",
         },
       },
       fontFamily: {

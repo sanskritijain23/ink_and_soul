@@ -4,6 +4,7 @@ import {
     addRecord,
     deleteRecord,
     getAllRecords,
+    updateRecord,
 } from '../../services/db'
 
 function ReadingJournal() {
@@ -77,6 +78,28 @@ function ReadingJournal() {
         }
 
 
+    }
+
+    async function handleStatusChange(book, newStatus) {
+        try {
+            const updatedBook = {
+                ...book,
+                status: newStatus,
+            }
+
+            await updateRecord('books', updatedBook)
+
+            setBooks((previousBooks) =>
+                previousBooks.map((item) => 
+                    item.id === book.id ? updatedBook : item  
+                )
+            )
+            setMessage(`Moved "${book.title}" to ${newStatus}.`)
+        }
+        catch (error) {
+            console.error('Could not update book status:', error)
+            setMessage('Could not update the book status. Please try again.')
+        }
     }
 
     return (

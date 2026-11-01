@@ -10,10 +10,13 @@ import {
 function ReadingJournal() {
     const [title, setTitle] = useState('')
     const [author, setAuthor] = useState('')
+    const [totalPages, setTotalPages] = useState('')
     const [status, setStatus] = useState('Want to Read')
     const [books, setBooks] = useState([])
     const [loading, setLoading] = useState(true)
     const [message, setMessage] = useState('')
+    const [pagesInputs, setPagesinputs] = useState({})
+    const [totalPageInputs, setTotalPageInputs] = useState({})
 
     useEffect(() => {
         async function loadBooks() {
@@ -46,6 +49,8 @@ function ReadingJournal() {
             title: title.trim(),
             author: author.trim(),
             status,
+            totalPages: Number(totalPages) || 0,
+            pagesRead: 0,
             createdAt: new Date().toISOString(),
 
         }
@@ -56,6 +61,7 @@ function ReadingJournal() {
             setBooks((previousBooks) => [...previousBooks,newBook])
             setTitle('')
             setAuthor('')
+            setTotalPages('')
             setStatus('Want to Read')
             setMessage('Book added to your library.')
         }
@@ -100,6 +106,52 @@ function ReadingJournal() {
             console.error('Could not update book status:', error)
             setMessage('Could not update the book status. Please try again.')
         }
+    }
+
+    async function handleProgressChange(book, field, value){
+        const numberValue = value === '' ? 0 : Number(value)
+
+        if (!Number.isInteger(numberValue) || numberValue < 0){
+            setMessage('Please enter a valid page number.')
+            return false
+        }
+
+        const updatedBook = {
+            ...book,
+            [field]: numberValue,
+        }
+
+        if (
+            updatedBook.totalPages > 0 &&
+            updatedBook.pagesRead > updatedBook.totalPages
+        ) {
+            setMessage('Pages read cannot exceed total pages.')
+            return false
+        }
+
+        try {
+            await updateRecord('books', updatedBook)
+
+            setBooks((previousBooks) => 
+            previousBooks.map((item) =>
+                 item.id === book.id ? updatedBook : item
+            ))
+            setMessage(`Progress saved for "${book.title}".`)
+            return true 
+        }
+        catch (error) {
+            console.error('Could not save reading progress:', error)
+            setMessage('Couls not save progress. Please try again.')
+            return false 
+        }
+    }
+
+    const getProgress = (book) => {
+        if (!book.totalPages || book.totalPages <= 0) {
+            return 0
+        }
+
+        return Math.round((book.pagesRead / book.totalPages) * 100)
     }
 
     const shelves = [
@@ -196,6 +248,26 @@ function ReadingJournal() {
                             className="w-full rounded-xl border border-paper-border bg-paper px-4 py-3 text-ink outline-none transition focus:border-sage-dark"
                             required
                             />
+                    </div>
+
+                    <div>
+                        <label 
+                        htmlFor="book-total-pages"
+                        className="mb-2 block text-sm text-ink">
+                            Total pages
+                            <span className="ml-2 text-ink-muted">(optional)</span>
+                        </label>
+
+                        <input 
+                            id="book-total-pages"
+                            type="number"
+                            min="1"
+                            step="1"
+                            value={totalPages}
+                            onChange={(event) => setTotalPages(event.target.value)}
+                            placeholder="e.g. 350"
+                            className="w-full rounded-xl border border-paper-border bg-paper px-4 py-3 text-ink outline-none transition focus:border-sage-dark"/>
+
                     </div>
 
                     <div>
@@ -338,6 +410,115 @@ function ReadingJournal() {
                                                    <p className="mt-1 text-sm text-ink-muted">
                                                         by {book.author}
                                                    </p>
+
+                                                   <div className="mt-5">
+                                                        <div className="mb-2 flex items-center justify-between-gap-2">
+                                                            <span className="text-xs text-ink-muted">
+                                                                Reading progress 
+                                                            </span>
+
+                                                            <span className="text-xs font-medium text-sage-ink">
+                                                                {getProgress(book)}%
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="h-2 overflow-hidden rounded-full bg-sage/40"
+                                                             role="progressbar"
+                                                             aria-label={`Reading progress for ${book.title}`}
+                                                             aria-valuemin={0}
+                                                             aria-valuemax={100}
+                                                             aria-valuenow={getProgress(book)}
+                                                        >
+                                                            <div className="h-full rounded-full bg-sage-ink transition-all duration-300"
+                                                                 style={{ width: `${getProgress(book)}%` }} />
+
+                                                        </div>
+
+                                                        <p className="mt-2 text-xs text-ink-muted">
+                                                            {book.pagesRead ?? 0} of {book.totalPages ?? 0} pages
+                                                        </p>
+
+                                                        <div className="mt-3 grid grid-cols-2 gap-3">
+                                                            <div>
+                                                                <label  
+                                                                     htmlFor={`pages-read-${book.id}`}
+                                                                     className="mb-1 block text-xs text-ink-muted">
+                                                                    Pages read 
+                                                                </label>
+
+                                                                <input 
+                                                                    id={`pages-read-${book.id}`}
+                                                                    type="number"
+                                                                    min="0"
+                                                                    max={book.totalPages || undefined}
+                                                                    step="1"
+                                                                    value={pagesInputs[book.id] ?? (book.pagesRead) ?? 0}
+                                                                    onChange={(event) => {
+                                                                        setPagesinputs((previous) => ({
+                                                                            ...previous,
+                                                                            [book.id]: event.target.value,
+                                                                        }))
+                                                                    }}
+                                                                    onBlur={async (event) => {
+                                                                        const value = event.currentTarget.value
+                                                                        const saved = await handleProgressChange(
+                                                                            book,
+                                                                            'pagesRead',
+                                                                            value 
+                                                                        )
+                                                                        if (saved) {
+                                                                            setPagesinputs((previous) => {
+                                                                                const next = { ...previous }
+                                                                                delete next[book.id]
+                                                                                return next
+                                                                            })
+                                                                        }
+                                                                    }}
+                                                                    className="w-full rounded-lg border border-paper-border bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-sage-dark disabled:cursor-not-allowed disabled:opacity-50"
+                                                                />
+
+                                                            </div>
+
+                                                            <div>
+                                                                <label 
+                                                                     htmlFor={`total-pages-${book.id}`}
+                                                                     className="mb-1 block text-xs text-ink-muted">
+                                                                        Total pages
+                                                                     </label>
+
+                                                                     <input
+                                                                        id={`total-pages-${book.id}`}
+                                                                        type="number"
+                                                                        min="1"
+                                                                        step="1"
+                                                                        value={totalPageInputs[book.id] ?? (book.totalPageInputs ?? 0)}
+                                                                        onChange={(event) => {
+                                                                            setTotalPageInputs((previous) => ({
+                                                                                ...previous,
+                                                                                [book.id]: event.target.value,
+                                                                            }))
+                                                                        }}     
+                                                                        onBlur={async (event) => {
+                                                                            const value = event.currentTarget.value 
+                                                                            const saved = await handleProgressChange(
+                                                                                book,
+                                                                                'totalPages',
+                                                                                value
+                                                                            )
+
+                                                                            if (saved) {
+                                                                                setTotalPageInputs((previous) => {
+                                                                                    const next = { ...previous }
+                                                                                    delete next[book.id]
+                                                                                    return next
+                                                                                })
+                                                                            }
+                                                                        }}
+                                                                        className="w-full rounded-lg border border-paper-border bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-sage-dark"
+                                                                    />
+                                                            </div>
+                                                        </div>
+                                                   </div>
 
                                                    <div className="relative mt-4">
                                                         <select 

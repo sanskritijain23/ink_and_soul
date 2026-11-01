@@ -491,7 +491,7 @@ function ReadingJournal() {
                                                                         type="number"
                                                                         min="1"
                                                                         step="1"
-                                                                        value={totalPageInputs[book.id] ?? (book.totalPageInputs ?? 0)}
+                                                                        value={totalPageInputs[book.id] ?? (book.totalPages ?? 0)}
                                                                         onChange={(event) => {
                                                                             setTotalPageInputs((previous) => ({
                                                                                 ...previous,

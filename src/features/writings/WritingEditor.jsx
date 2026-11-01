@@ -11,7 +11,10 @@ function WritingEditor() {
     const [writings, setWritings] = useState([])
     const [activeId, setActiveId] = useState(null)
     const [title, setTitle] = useState('')
+    const [writingType, setWritingType] = useState('')
     const [content, setContent] = useState('')
+    const [searchTerm, setSearchTerm] = useState('')
+    const [typeFilter, setTypeFilter] = useState('All')
     const [loading, setLoading] = useState(true)
     const [message, setMessage] = useState('')
 
@@ -41,6 +44,7 @@ function WritingEditor() {
         setActiveId(null)
         setTitle('')
         setContent('')
+        setWritingType('')
         setMessage('')
     }
 
@@ -48,6 +52,7 @@ function WritingEditor() {
         setActiveId(writing.id)
         setTitle(writing.title)
         setContent(writing.content)
+        setWritingType(writing.type ?? '')
         setMessage('')
     }
 
@@ -62,6 +67,7 @@ function WritingEditor() {
         const record = {
             id: activeId ?? crypto.randomUUID(),
             title: title.trim() || 'Untitled',
+            type: writingType.trim(),
             content,
             updatedAt: now,
             ...(!activeId && { createdAt: now }),
@@ -124,6 +130,20 @@ function WritingEditor() {
         }
     }
 
+    const writingTypes = [
+        ...new Set(
+            writings.map((writing) => writing.type ?.trim()).filter(Boolean)
+        ),
+    ].sort((a,b) => a.localeCompare(b))
+
+    const filterWritings = writings.filter((writing) => {
+        const matchesSearch = writing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        writing.content.toLowerCase().includes(searchTerm.toLowerCase())
+
+        const matchesType = typeFilter === 'All' || writing.type === typeFilter
+        return matchesSearch && matchesType
+    })
+
     return (
         <div className="min-h-screen bg-paper px-6 py-10 md:px-10">
             <div className="mx-auto max-w-6xl">
@@ -153,6 +173,22 @@ function WritingEditor() {
 
                    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
                         <section className="rounded-3xl border border-paper-border bg-paper-card p-6 shadow-sm md:p-8">
+                            <div className="mb-6">
+                                <label 
+                                   htmlFor="writing-type"
+                                   className="mb-2 block text-xs uppercase tracking-[0.18em] text-ink-muted">
+                                      This piece is...
+                                   </label>
+
+                                   <input 
+                                      id="writing-type"
+                                      type="text"
+                                      value={writingType}
+                                      onChange={(event) => setWritingType(event.target.value)}
+                                      placeholder="Poetry, reflection, ghazal..."
+                                      className="w-full border-b border-paper-border bg-transparent pb-3 font-reading text-base italic text-ink outline-none placeholder:text-ink-muted/60 focus:border-sage-dark" />
+
+                            </div>
                             <input 
                                value={title}
                                onChange={(event) => setTitle(event.target.value)}
@@ -211,31 +247,74 @@ function WritingEditor() {
                                    </button>
                             </div>
 
+                            <div className="mb-4 space-y-3">
+                                <div className="relative">
+                                    <input 
+                                        type="text"
+                                        value={searchTerm}
+                                        onChange={(event) => setSearchTerm(event.target.value)}
+                                        placeholder="Search your words..."
+                                        aria-label="Search-eritings"
+                                        className="w-full rounded-xl border border-paper-border bg-paper px-4 py-3 text-sm text-ink outline-none transition focus:border-sage-dark"/>
+
+                                </div>
+                                <select 
+                                    value={typeFilter}
+                                    onChange={(event) => setTypeFilter(event.target.value)}
+                                    aria-label="Filter writings by type"
+                                    className="w-full rounded-xl border border-paper-border bg-paper px-3 py-2.5 text-sm text-ink outline-none focus:border-sage-dark">
+                                        <option value="All">All writings</option>
+                                        {writingTypes.map((type) => (
+                                            <option key={type} value={type}>
+                                                {type}
+                                            </option>
+                                        ))}
+                                    </select>
+                            </div>
+
                             {loading ? (
-                                <p className="text-sm text-ink-muted">Opening your pages...</p>
+                                <p className="text-sm text-ink-muted">
+                                    Opening your pages...
+                                </p>
                             ) : writings.length === 0 ? (
                                 <p className="font-reading text-sm italic leading-6 text-ink-muted">
                                     Your saved words will find a home here.
-                                </p> 
+                                </p>
+                            ) : filterWritings.length === 0 ? (
+                                <p className="py-5 text-center font-reading text-sm italic text-ink-muted">
+                                    No writings found. Try another search. 
+                                </p>
                             ) : (
-                                <div className="space-y-2">
-                                    {writings.map((writing) => (
+                                <div className="space-y-3">
+                                    {filterWritings.map((writing) => (
                                         <button 
-                                           key={writing.id}
-                                           onClick={() => openWriting(writing)}
-                                           className={`w-full rounded-xl border p-3 text-left transition ${
-                                             activeId === writing.id
-                                              ? 'border-sage-dark bg-sage/60'
-                                              : 'border-transparent hover:border-paper-border hover:bg-paper'}`}>
-                                                <span className="block truncate font-medium text-ink">
-                                                    {writing.title}
+                                            key={writing.id}
+                                            onClick={() => openWriting(writing)}
+                                            className={`w-full rounded-xl border p-4 text-left transition ${
+                                                activeId === writing.id
+                                                ? 'border-sage-dark bg-sage/60'
+                                                : 'border-transparent hover:border-paper-border hover:bg-paper'}`}>
+                                                    <span className="block truncate font-display text-lg text-ink">
+                                                        {writing.title}
+                                                    </span>
 
-                                                </span>
-                                                <span className="mt-1 block text-xs text-ink-muted">
-                                                    {new
-                                                    Date(writing.updatedAt).toLocaleDateString()}
-                                                </span>
-                                              </button>
+                                                    <span className="mt-1 block text-xs text-ink-muted">
+                                                        {new Date(writing.updatedAt).toLocaleDateString()}
+
+                                                    </span>
+                                                    {writing.type?.trim() && (
+                                                        <span className="mt-2 inline-block rounded-full bg-sage px-2.5 py-1 text-xs text-sage-ink">
+                                                            {writing.type}
+                                                        </span>
+                                                    )}
+
+                                                    <span className="mt-2 block text-sm leading-6 text-ink-muted">
+                                                        {writing.content.length > 85 
+                                                            ? `${writing.content.slice(0, 85)}...`
+                                                            : writing.content}
+                                                    </span>
+                                                    
+                                                </button>
                                     ))}
                                 </div>
                             )

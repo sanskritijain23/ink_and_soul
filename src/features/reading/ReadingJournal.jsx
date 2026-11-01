@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { BookOpen, Plus, Trash2 } from "lucide-react"
+import { BookOpen, Plus, Trash2, ChevronDown, Library, BookCheck, Bookmark } from "lucide-react"
 import {
     addRecord,
     deleteRecord,
@@ -102,6 +102,32 @@ function ReadingJournal() {
         }
     }
 
+    const shelves = [
+        {
+            title: 'Want to Read',
+            subtitle: 'Stories waiting for you',
+            status: 'Want to Read',
+            icon: Bookmark,
+        },
+        {
+            title: 'Currently Reading',
+            subtitle: 'Worlds you are living in',
+            status: 'Currently Reading',
+            icon: Library,
+        },
+        {
+            title: 'Finished',
+            subtitle: 'Stories that stayed with you',
+            status: 'Finished',
+            icon: BookCheck,
+        },
+
+    ]
+
+    const getBooksForShelf = (shelfStatus) => {
+        return books.filter((book) => book.status === shelfStatus)
+    }
+
     return (
         <div className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-12">
             <header className="mb-10">
@@ -182,9 +208,9 @@ function ReadingJournal() {
                                 value={status}
                                 onChange={(event) => setStatus(event.target.value)}
                                 className="w-full rounded-xl border border-paper-border bg-paper px-4 py-3 text-ink outline-none focus:border-sage-dark">
-                                    <option>Want to Read</option>
-                                    <option>Reading</option>
-                                    <option>Finished</option>
+                                <option value="Want to Read">Want to Read</option>
+                                <option value="Currently Reading">Currently Reading</option>
+                                <option value="Finished">Finished</option>   
                             </select>
                     </div>
 
@@ -200,9 +226,13 @@ function ReadingJournal() {
             </section>
 
             <section>
-                <div className="mb-5 flex items-center justify-between gap-3">
+                <div className="mb-6 flex items-end justify-between gap-3">
                     <div>
-                        <h2 className="font-display text-2xl text-ink">
+                        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-sage-ink">
+                            Your reading life
+                        </p>
+
+                        <h2 className="font-display text-3xl text-ink">
                             Your bookshelf
                         </h2>
 
@@ -213,66 +243,136 @@ function ReadingJournal() {
                 </div>
 
                 {message && (
-                    <p role="status" className="mb-4 text-sm text-sage-ink">
+                    <p role="status" className="mb-5 test-sm text-sage-ink">
                         {message}
                     </p>
                 )}
 
                 {loading ? (
-                    <p className="text-sm text-ink-muted">Opening your library...</p>
+                    <p className="py-8 test-sm text-ink-muted">
+                        Opening your library...
+                    </p>    
                 ) : books.length === 0 ? (
-                    <div className="rounded-2xl border border-paper-border bg-paper-card p-8 text-center">
-                        <BookOpen size={28} className="mx-auto mb-3 text-sage-ink" />
-                        <p className="font-display text-xl text-ink">
+                    <div className="rounded-2xl border border-paper-border bg-paper-card p-10 text-center">
+                        <BookOpen size={30} className="mx-auto mb-3 text-sage-ink " />
+                        <h3 className="font-display text-2xl text-ink">
                             An empty shelf, for now.
-                        </p>
+                        </h3>
 
                         <p className="mt-2 font-reading text-sm italic text-ink-muted">
                             Add a book above to begin your collection.
                         </p>
+
                     </div>
                 ) : (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {books.map((book) => (
-                            <article 
-                                key={book.id}
-                                className="rounded-2xl border border-paper-border bg-paper-card p-5 transition hover:-translate-y-1 hover:shadow-md">
-                                    <div className="mb-4 flex items-start justify-between gap-3">
-                                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sage text-sage-ink">
-                                            <BookOpen size={20} />
+                    <div className="space-y-10">
+                        {shelves.map((shelf, shelfIndex) => {
+                            const shelfBook = getBooksForShelf(shelf.status)
+                            const shelfIcon = shelf.icon
 
+                            return (
+                                <section key={shelf.status}>
+                                    <div className="mb-4 flex items-center justify-between border-b border-paper-border pb-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sage text-sage-ink">
+                                                <shelfIcon size={19} />
+                                            </div>
+
+                                            <div>
+                                                <h3 className="font-display text-2xl text-ink">
+                                                    {shelf.title}
+                                                </h3>
+
+                                                <p className="text-xs text-ink-muted">
+                                                    {shelf.subtitle}
+                                                </p>
+                                            </div>
                                         </div>
 
-                                        <button 
-                                           type="button"
-                                           onClick={() => {
-                                            const confirmed = window.confirm(
-                                                `Remove "${book.title}" from your library?`
-                                            )
-                                            if (confirmed)
-                                                 handleDelete(book.id)
-                                           }}
-                                           aria-label={`Delete ${book.title}`}
-                                           className="rounded-lg p-2 text-ink-muted transition hover:bg-red-50 hover:text-red-700">
-                                               <Trash2 size={17} />
-                                           </button>
+                                        <span className="rounded-full bg-sage/60 px-3 py-1 text-xs text-sage-ink">
+                                            {shelfBook.length}
+                                        </span>
                                     </div>
 
-                                    <h3 className="font-display text-xl text-ink">
-                                        {book.title}
-                                    </h3>
+                                    {shelfBook.length === 0 ? (
+                                        <p className="rounded-xl border border-dashed border-paper-border px-5 py-6 font-reading text-sm italic text-ink-muted">
+                                            Nothing on this shelf just yet.
+                                        </p>    
+                                    ) : (
+                                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                            {shelfBook.map((book) => (
+                                                <article 
+                                                   key={book.id}
+                                                   className="group rounded-2xl border border-paper-border bg-paper-card p-5 transition duration-200 hover:-translate-y-1 hover:shadow-md">
+                                                   <div className="mb-4 flex items-start justify-between gap-3">
+                                                        <div className="flex h-28 w-20 shrink-0 items-center justify-center rounded-md bg-forest px-2 text-center shadow-sm">
+                                                            <div>
+                                                                <BookOpen size={20} className="mx-auto mb-2 text-clay"/>
+                                                                <p className="line-clamp-3 font-display text-sm text-paper">
+                                                                    {book.title}
+                                                                </p>
+                                                            </div>
+                                                        </div>
 
-                                    <p className="mt-1 text-sm text-ink-muted">
-                                        by {book.author}
-                                    </p>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const confirmed = window.confirm(
+                                                                    `Remove "${book.title}" from your library?`
+                                                                )
+                                                                if (confirmed) {
+                                                                    handleDelete(book.id)
+                                                                }
+                                                            }}
+                                                            aria-label={`Delete ${book.title}`}
+                                                            className="roundded-lg p-2 text-ink-muted transition hover:bg-red-50 hover:text-red-700">
+                                                                <Trash2 size={17} />
 
-                                    <span className="mt-4 inline-block rounded-full bg-sage/60 px-3 py-1 text-xs text-sage-ink">
-                                        {book.status}
-                                    </span>
-                            </article>
-                        ))}
+                                                            </button>
+                                                   </div>
+
+                                                   <h4 className="font-display text-xl text-ink">
+                                                        {book.title}
+                                                   </h4>
+
+                                                   <p className="mt-1 text-sm text-ink-muted">
+                                                        by {book.author}
+                                                   </p>
+
+                                                   <div className="relative mt-4">
+                                                        <select 
+                                                            aria-label={`Reading status for ${book.title}`}
+                                                            value={book.status}
+                                                            onChange={(event) => handleStatusChange( book, event.target.value)}
+                                                            className="w-full appearance-none rounded-xl border border-paper-border bg-paper px-3 py-2 pr-9 text-xs text-ink outline-none transition focus:border-sage-dark">
+                                                                <option value="Want to Read">
+                                                                    Want to Read
+                                                                </option>
+
+                                                                <option value="Currently Reading">
+                                                                    Currently Reading
+                                                                </option>
+
+                                                                <option value="Finished">
+                                                                    Finished
+                                                                </option>
+                                                            </select>
+
+                                                            <ChevronDown
+                                                                size={15}
+                                                                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted"/>
+
+                                                   </div>
+                                                </article>
+                                            ))}
+                                        </div>
+                                    )
+                                    }
+                                </section>
+                            )
+                        })}
                     </div>
-                )    
+                )
                 }
             </section>
         </div>

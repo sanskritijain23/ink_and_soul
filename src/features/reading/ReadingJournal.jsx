@@ -340,14 +340,14 @@ function ReadingJournal() {
                     <div className="space-y-10">
                         {shelves.map((shelf, shelfIndex) => {
                             const shelfBook = getBooksForShelf(shelf.status)
-                            const shelfIcon = shelf.icon
+                            const ShelfIcon = shelf.icon
 
                             return (
                                 <section key={shelf.status}>
                                     <div className="mb-4 flex items-center justify-between border-b border-paper-border pb-3">
                                         <div className="flex items-center gap-3">
                                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sage text-sage-ink">
-                                                <shelfIcon size={19} />
+                                                <ShelfIcon size={19} />
                                             </div>
 
                                             <div>
@@ -397,7 +397,7 @@ function ReadingJournal() {
                                                                 }
                                                             }}
                                                             aria-label={`Delete ${book.title}`}
-                                                            className="roundded-lg p-2 text-ink-muted transition hover:bg-red-50 hover:text-red-700">
+                                                            className="rounded-lg p-2 text-ink-muted transition hover:bg-red-50 hover:text-red-700">
                                                                 <Trash2 size={17} />
 
                                                             </button>
@@ -412,7 +412,7 @@ function ReadingJournal() {
                                                    </p>
 
                                                    <div className="mt-5">
-                                                        <div className="mb-2 flex items-center justify-between-gap-2">
+                                                        <div className="mb-2 flex items-center justify-between gap-2">
                                                             <span className="text-xs text-ink-muted">
                                                                 Reading progress 
                                                             </span>

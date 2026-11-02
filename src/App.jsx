@@ -3,6 +3,7 @@ import AppLayout from "./components/layout/AppLayout"
 import Dashboard from "./features/dashboard/Dashboard"
 import WritingEditor from "./features/writings/WritingEditor"
 import ReadingJournal from "./features/reading/ReadingJournal"
+import QuotesPage from "./features/quotes/QuotesPages"
 
 function App() {
   return (
@@ -35,7 +36,19 @@ function App() {
             </AppLayout>
           }
         />
+
+
+        <Route 
+          path="/quotes"
+          element={
+            <AppLayout>
+              <QuotesPage />
+
+            </AppLayout>
+          }
+        />
        </Routes>
+
     </BrowserRouter>
   )
 }

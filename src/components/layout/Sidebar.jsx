@@ -2,11 +2,11 @@ import { BookOpen, Feather, House, Library, Quote, Sparkles } from 'lucide-react
 import { NavLink } from 'react-router-dom'
 
 const navItems = [
-    {label: 'Home', icon: House },
-    {label: 'My Writings', icon: Feather},
-    {label: 'Reading Journal', icon: Library},
-    {label: 'Saved Quotes', icon: Quote},
-    {label: 'inspiration', icon: Sparkles },
+    {label: 'Home', icon: House, path:'/'},
+    {label: 'My Writings', icon: Feather, path: '/writings'},
+    {label: 'Reading Journal', icon: Library, path: '/reading-journal'},
+    {label: 'Saved Quotes', icon: Quote, path: '/quotes'},
+    {label: 'inspiration', icon: Sparkles, path: '#' },
 ]
 
 function Sidebar () {
@@ -32,45 +32,32 @@ function Sidebar () {
                 </p>
 
                 <div className='space-y-1.5'>
-                    {navItems.map((item, index) => {
+                    {navItems.map((item) => {
                         const Icon = item.icon
-                        const isActive = index === 0
-
                         return (
                             <NavLink
-                              key={item.label}
-                              to={index === 0
-                                ? '/'
-                                : index === 1
-                                ? '/writings'
-                                : index === 2 
-                                ? '/reading-journal'
-                                : '#'
-                              }
-                            className={({ isActive }) => `group flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left font-sans text-sm transition-all suration-300 ${
-                                isActive
-                                ? 'border-sage-dark/40 bg-sage text-sage-ink font-medium shadow-sm'
-                                : 'border-transparent text-ink-brown hover:border-paper-border hover:bg-paper hover:pl-4 hover:text-sage-ink'}`}>
-                                    {({ isActive }) => {
-                                        const Icon = item.icon
-                                        return (
+                                 key={item.label}
+                                 to={item.path}
+                                 end={item.path === '/'}
+                                 className={({ isActive }) => `group flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left font-sans text-sm transition-all duration-300 ${ 
+                                    isActive && item.path !== '#' 
+                                    ? 'border-sage-dark/40 bg-sage font-medium text-sage-ink shadow-sm'
+                                    : 'border-transparent text-ink-ink-brown hover:bg-paper hover:pl-4 hover:text-sage-ink'}`}>
+                                        {({ isActive }) => (
                                             <>
-                                               <Icon
-                                                  size={18}
-                                                  strokeWidth={1.6}
-                                                  className={`shrink-0 transition-transform duration-300 ${
-                                                    isActive ? 'text-sage-ink' : 'group-hover:scale-110'}`}
-                                                    />
-
+                                               <Icon 
+                                                   size={18}
+                                                   strokeWidth={1.6}
+                                                   className={`shrink-0 transition-transform duration-300 ${
+                                                    isActive ? 'text-sage-ink' : 'group-hover:scale-110'}`} />
                                                     <span>{item.label}</span>
-                                                    {isActive && (
-                                                        <span className='ml-auto h-1.5 w-1.5 rounded-full bg-sage-ink' />
+                                                    {isActive && item.path !== '#' && (
+                                                        <span className='ml-auto h-1.5 w-1.5 rounded-full ng-sage-ink' />
                                                         
                                                     )}
                                             </>
-                                        )
-                                    }}
-                                </NavLink>
+                                        )}
+                                    </NavLink>
                         )
                     })}
                 </div>

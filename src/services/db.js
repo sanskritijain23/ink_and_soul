@@ -1,7 +1,7 @@
 import { openDB } from 'idb'
 
 const DB_NAME = 'ink-and-soul'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 let dbPromise
 
@@ -27,6 +27,13 @@ function getDB() {
                     db.createObjectStore('quotes', {
                         keyPath: 'id',
                     })
+                }
+                if (!db.objectStoreNames.contains('inspirations')) {
+                    const inspirationStore = db.createObjectStore('inspirations', {
+                        keyPath: 'id',
+                    })
+                    inspirationStore.createIndex('savedAt', 'savedAt')
+                    inspirationStore.createIndex('type', 'type')
                 }
             },
 

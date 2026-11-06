@@ -4,6 +4,7 @@ import Dashboard from "./features/dashboard/Dashboard"
 import WritingEditor from "./features/writings/WritingEditor"
 import ReadingJournal from "./features/reading/ReadingJournal"
 import QuotesPage from "./features/quotes/QuotesPages"
+import InspirationPage from "./features/inspiration/InspirationPage"
 
 function App() {
   return (
@@ -47,7 +48,15 @@ function App() {
             </AppLayout>
           }
         />
-       </Routes>
+       <Route
+          path="/inspiration"
+          element={
+            <AppLayout>
+              <InspirationPage/>
+            </AppLayout>
+          }
+        />
+      </Routes>
 
     </BrowserRouter>
   )

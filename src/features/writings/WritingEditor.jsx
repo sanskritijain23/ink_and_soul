@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Feather, Save, Plus, Trash2 } from 'lucide-react'
 import {
     addRecord,
@@ -8,6 +9,8 @@ import {
 } from '../../services/db'
 
 function WritingEditor() {
+    const location = useLocation()
+    const navigate = useNavigate()
     const [writings, setWritings] = useState([])
     const [activeId, setActiveId] = useState(null)
     const [title, setTitle] = useState('')
@@ -39,6 +42,20 @@ function WritingEditor() {
         }
         loadWritings()
     }, [])
+
+    useEffect(() => {
+        const inspirationPrompt = location.state?.inspirationPrompt
+        if(!inspirationPrompt) return
+        setActiveId(null)
+        setTitle(inspirationPrompt.title || '')
+        setContent(inspirationPrompt.content || '')
+        setWritingType(inspirationPrompt.type || 'Tnspired writing')
+        setMessage('Your inspiration is ready. Make it your own.')
+        navigate(location.pathname, {
+            replace: true,
+            state: null,
+        })
+    }, [location.state, location.pathname, navigate])
 
     function startNewWriting() {
         setActiveId(null)

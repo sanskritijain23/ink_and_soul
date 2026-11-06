@@ -16,7 +16,6 @@ function ReadingJournal() {
     const [loading, setLoading] = useState(true)
     const [message, setMessage] = useState('')
     const [pagesInputs, setPagesinputs] = useState({})
-    const [totalPageInputs, setTotalPageInputs] = useState({})
 
     useEffect(() => {
         async function loadBooks() {
@@ -38,31 +37,35 @@ function ReadingJournal() {
 
     async function handleSubmit(event) {
         event.preventDefault()
-
         if (!title.trim() || !author.trim()) {
-            setMessage('Please enter both a title and a authot.')
+            setMessage('Please enter both a title and an author.')
             return
         }
-
+        const parsedTotalPages = Number(totalPages)
+        if (
+            totalPages.trim() === '' ||
+            !Number.isSafeInteger(parsedTotalPages) ||
+            parsedTotalPages < 1
+        ) {
+            setMessage('Total pages must be a whole number greater than 0.')
+            return
+        }
         const newBook = {
             id: crypto.randomUUID(),
             title: title.trim(),
             author: author.trim(),
             status,
-            totalPages: Number(totalPages) || 0,
-            pagesRead: 0,
+            totalPages: parsedTotalPages,
+            pagesRead: status === 'Finished' ? parsedTotalPages : 0,
             createdAt: new Date().toISOString(),
-
         }
-
         try {
             await addRecord('books', newBook)
-
-            setBooks((previousBooks) => [...previousBooks,newBook])
+            setBooks((previous) => [...previous, newBook])
             setTitle('')
             setAuthor('')
             setTotalPages('')
-            setStatus('Want to Read')
+            setStatus('Want to read')
             setMessage('Book added to your library.')
         }
         catch (error) {
@@ -87,62 +90,73 @@ function ReadingJournal() {
     }
 
     async function handleStatusChange(book, newStatus) {
+        if (
+            newStatus === 'Finished' && 
+            (!Number.isSafeInteger(book.totalPages) || book.totalPages < 1)
+        ){
+            setMessage('Please add a valid total page count before finishing this book.')
+            return
+        }
+        const updatedBook = {
+            ...book,
+            status: newStatus,
+            pagesRead:
+                newStatus === 'Finished'
+                    ? book.totalPages
+                    : newStatus === 'Want to Read'
+                        ? 0
+                        : book.pagesRead,
+        }
         try {
-            const updatedBook = {
-                ...book,
-                status: newStatus,
-            }
-
             await updateRecord('books', updatedBook)
-
-            setBooks((previousBooks) =>
-                previousBooks.map((item) => 
-                    item.id === book.id ? updatedBook : item  
-                )
+            setBooks((previousBooks) => previousBooks.map((item) => item.id === book.id ? updatedBook : item) )
+            setMessage(
+                newStatus === 'Finished'
+                   ? `"${book.title}" marked as finished!`
+                   : `Status updated for "${book.title}".`
             )
-            setMessage(`Moved "${book.title}" to ${newStatus}.`)
         }
         catch (error) {
             console.error('Could not update book status:', error)
-            setMessage('Could not update the book status. Please try again.')
+            setMessage('Could not update book status. Please try again.')
         }
+
     }
 
-    async function handleProgressChange(book, field, value){
-        const numberValue = value === '' ? 0 : Number(value)
-
-        if (!Number.isInteger(numberValue) || numberValue < 0){
-            setMessage('Please enter a valid page number.')
+    async function handleProgressChange(book, value) {
+        const rawValue = String(value).trim()
+        if (rawValue === '') {
+            setMessage('Pages read cannot be empty.')
             return false
         }
-
-        const updatedBook = {
-            ...book,
-            [field]: numberValue,
+        const numberValue = Number(rawValue)
+        if (!Number.isSafeInteger(numberValue) || numberValue < 0){
+            setMessage('Please enter a valid whole number.')
+            return false
         }
-
-        if (
-            updatedBook.totalPages > 0 &&
-            updatedBook.pagesRead > updatedBook.totalPages
-        ) {
+        const totalPages = Number(book.totalPages)
+        if (!Number.isSafeInteger(totalPages) || totalPages < 1) {
+            setMessage('This book needs a valid total page count.')
+            return false
+        }
+        if (numberValue > totalPages) {
             setMessage('Pages read cannot exceed total pages.')
             return false
         }
-
+        const updatedBook = {
+            ...book,
+            pagesRead: numberValue,
+        }
         try {
             await updateRecord('books', updatedBook)
-
-            setBooks((previousBooks) => 
-            previousBooks.map((item) =>
-                 item.id === book.id ? updatedBook : item
-            ))
-            setMessage(`Progress saved for "${book.title}".`)
-            return true 
+            setBooks((previousBooks) => item.id === book.id ? updatedBook : item) 
+            setMessage(`Progresss saved for "${book.title}".`)
+            return true
         }
         catch (error) {
             console.error('Could not save reading progress:', error)
-            setMessage('Couls not save progress. Please try again.')
-            return false 
+            setMessage('Could not save progress. Please try again.')
+            return false
         }
     }
 
@@ -150,7 +164,6 @@ function ReadingJournal() {
         if (!book.totalPages || book.totalPages <= 0) {
             return 0
         }
-
         return Math.round((book.pagesRead / book.totalPages) * 100)
     }
 
@@ -255,7 +268,7 @@ function ReadingJournal() {
                         htmlFor="book-total-pages"
                         className="mb-2 block text-sm text-ink">
                             Total pages
-                            <span className="ml-2 text-ink-muted">(optional)</span>
+                            <span className="ml-2 text-clay-dark text-xs">(required)</span>
                         </label>
 
                         <input 
@@ -263,6 +276,7 @@ function ReadingJournal() {
                             type="number"
                             min="1"
                             step="1"
+                            required
                             value={totalPages}
                             onChange={(event) => setTotalPages(event.target.value)}
                             placeholder="e.g. 350"
@@ -452,6 +466,7 @@ function ReadingJournal() {
                                                                     min="0"
                                                                     max={book.totalPages || undefined}
                                                                     step="1"
+                                                                    disabled={book.status === 'Finished'}
                                                                     value={pagesInputs[book.id] ?? (book.pagesRead) ?? 0}
                                                                     onChange={(event) => {
                                                                         setPagesinputs((previous) => ({
@@ -461,18 +476,12 @@ function ReadingJournal() {
                                                                     }}
                                                                     onBlur={async (event) => {
                                                                         const value = event.currentTarget.value
-                                                                        const saved = await handleProgressChange(
-                                                                            book,
-                                                                            'pagesRead',
-                                                                            value 
-                                                                        )
-                                                                        if (saved) {
-                                                                            setPagesinputs((previous) => {
-                                                                                const next = { ...previous }
-                                                                                delete next[book.id]
-                                                                                return next
-                                                                            })
-                                                                        }
+                                                                        await handleProgressChange(book, value)
+                                                                        setPagesinputs((previous) => {
+                                                                            const next = { ...previous }
+                                                                            delete next[book.id]
+                                                                            return next
+                                                                        })
                                                                     }}
                                                                     className="w-full rounded-lg border border-paper-border bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-sage-dark disabled:cursor-not-allowed disabled:opacity-50"
                                                                 />
@@ -480,42 +489,12 @@ function ReadingJournal() {
                                                             </div>
 
                                                             <div>
-                                                                <label 
-                                                                     htmlFor={`total-pages-${book.id}`}
-                                                                     className="mb-1 block text-xs text-ink-muted">
-                                                                        Total pages
-                                                                     </label>
-
-                                                                     <input
-                                                                        id={`total-pages-${book.id}`}
-                                                                        type="number"
-                                                                        min="1"
-                                                                        step="1"
-                                                                        value={totalPageInputs[book.id] ?? (book.totalPages ?? 0)}
-                                                                        onChange={(event) => {
-                                                                            setTotalPageInputs((previous) => ({
-                                                                                ...previous,
-                                                                                [book.id]: event.target.value,
-                                                                            }))
-                                                                        }}     
-                                                                        onBlur={async (event) => {
-                                                                            const value = event.currentTarget.value 
-                                                                            const saved = await handleProgressChange(
-                                                                                book,
-                                                                                'totalPages',
-                                                                                value
-                                                                            )
-
-                                                                            if (saved) {
-                                                                                setTotalPageInputs((previous) => {
-                                                                                    const next = { ...previous }
-                                                                                    delete next[book.id]
-                                                                                    return next
-                                                                                })
-                                                                            }
-                                                                        }}
-                                                                        className="w-full rounded-lg border border-paper-border bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-sage-dark"
-                                                                    />
+                                                                <span className="mb-1 block text-xs text-ink-muted">
+                                                                    Total pages
+                                                                </span>
+                                                                <p className="font-medium text-ink">
+                                                                    {book.totalPages} pages
+                                                                </p>
                                                             </div>
                                                         </div>
                                                    </div>

@@ -117,33 +117,25 @@ function WritingEditor() {
         }
     }
 
-    async function handleDelete() {
-        if (!activeId) {
-            setMessage('Select a saved writing to delete.')
-            return
-        }
-
+    async function handleDelete(writingId = activeId) {
+        if (!writingId) return
         const confirmed = window.confirm(
             'Are you sure you want to delete this writing?'
         )
-
-        if (!confirmed) return 
-
+        if (!confirmed) return
         try {
-            await deleteRecord('writings', activeId)
-
-            setWritings((previousWritings) => 
-                previousWritings.filter(
-                    (writing) => writing.id !== activeId
-                )
-            )
-
-            startNewWriting()
+            await deleteRecord('writings', writingId)
+            setWritings((previousWritings) => previousWritings.filter(
+                (writing) => writing.id !== writingId
+            ))
+            if (activeId === writingId) {
+                startNewWriting()
+            }
             setMessage('Writing deleted successfully.')
         }
         catch (error) {
             console.error('Could not delete writing:', error)
-            setMessage('Could not delete. please try again')
+            setMessage('Could not delete. Please try again.')
         }
     }
 
@@ -304,36 +296,53 @@ function WritingEditor() {
                             ) : (
                                 <div className="space-y-3">
                                     {filterWritings.map((writing) => (
-                                        <button 
-                                            key={writing.id}
+                                    <div
+                                        key={writing.id}
+                                        className={`group rounded-xl border p-4 transition ${
+                                        activeId === writing.id
+                                        ? 'border-sage-dark bg-sage/60'
+                                        : 'border-transparent hover:border-paper-border hover:bg-paper'
+                                    }`}
+                                    >
+                                        <button
                                             onClick={() => openWriting(writing)}
-                                            className={`w-full rounded-xl border p-4 text-left transition ${
-                                                activeId === writing.id
-                                                ? 'border-sage-dark bg-sage/60'
-                                                : 'border-transparent hover:border-paper-border hover:bg-paper'}`}>
-                                                    <span className="block truncate font-display text-lg text-ink">
-                                                        {writing.title}
-                                                    </span>
+                                            className="w-full text-left"
+                                        >
+                                            <span className="block truncate font-display text-lg text-ink">
+                                                {writing.title}
+                                            </span>
 
-                                                    <span className="mt-1 block text-xs text-ink-muted">
-                                                        {new Date(writing.updatedAt).toLocaleDateString()}
+                                            <span className="mt-1 block text-xs text-ink-muted">
+                                                {new Date(writing.updatedAt).toLocaleDateString()}
+                                            </span>
 
-                                                    </span>
-                                                    {writing.type?.trim() && (
-                                                        <span className="mt-2 inline-block rounded-full bg-sage px-2.5 py-1 text-xs text-sage-ink">
-                                                            {writing.type}
-                                                        </span>
-                                                    )}
+                                            {writing.type?.trim() && (
+                                            <span className="mt-2 inline-block rounded-full bg-sage px-2.5 py-1 text-xs text-sage-ink">
+                                                {writing.type}
+                                            </span>
+                                            )}
 
-                                                    <span className="mt-2 block text-sm leading-6 text-ink-muted">
-                                                        {writing.content.length > 85 
-                                                            ? `${writing.content.slice(0, 85)}...`
-                                                            : writing.content}
-                                                    </span>
-                                                    
-                                                </button>
-                                    ))}
-                                </div>
+                                            <span className="mt-2 block text-sm leading-6 text-ink-muted">
+                                                {writing.content.length > 85
+                                                ? `${writing.content.slice(0, 85)}...`
+                                                : writing.content}
+                                            </span>
+                                        </button>
+
+                                        <div className="mt-3 flex justify-end border-t border-paper-border/70 pt-2">
+                                            <button
+                                                onClick={() => handleDelete(writing.id)}
+                                                aria-label={`Delete ${writing.title}`}
+                                                title="Delete writing"
+                                                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-ink-muted transition hover:bg-red-50 hover:text-red-700"
+                                            >
+                                                <Trash2 size={14} />
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                             )
                             }
                         </aside>

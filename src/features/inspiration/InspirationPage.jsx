@@ -462,7 +462,7 @@ function InspirationPage() {
                     <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full border border-white/10"/>
                     <div className="pointer-events-none absolute -right-4 -top-12 h-52 w-52 rounded-full border border-white/10"/>
                     <div className="pointer-events-none absolute bottom-0 right-12 font-display text-[15rem] leading-none text-white/[0.035]">
-                         &ldquo;
+                         &rdquo;
                     </div>
                     <div className="relative max-w-3xl">
                         <p className="mb-5 font-sans text-[10px] font-semibold uppercase tracking-[0.25em] text-[#E5B968]">
@@ -509,7 +509,7 @@ function InspirationPage() {
                     <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
                         <div className="relative overflow-hidden rounded-3xl border border-paper-border bg-paper-card p-6 shadow-sm md:p-9">
                             <div className="absolute right-7 top-5 font-display text-8xl text-burgundy/10">
-                                 &ldquo;
+                                 &rdquo;
                             </div>
                             <div className="relative">
                                 <div className="mb-6 flex flex-wrap items-center gap-2">

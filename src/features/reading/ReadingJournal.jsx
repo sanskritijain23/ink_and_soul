@@ -65,7 +65,7 @@ function ReadingJournal() {
             setTitle('')
             setAuthor('')
             setTotalPages('')
-            setStatus('Want to read')
+            setStatus('Want to RSead')
             setMessage('Book added to your library.')
         }
         catch (error) {
@@ -149,8 +149,12 @@ function ReadingJournal() {
         }
         try {
             await updateRecord('books', updatedBook)
-            setBooks((previousBooks) => item.id === book.id ? updatedBook : item) 
-            setMessage(`Progresss saved for "${book.title}".`)
+            setBooks((previousBooks) =>
+                previousBooks.map((item) =>
+                item.id === book.id ? updatedBook : item
+            )
+        )
+            setMessage(`Progress saved for "${book.title}".`)
             return true
         }
         catch (error) {
@@ -268,7 +272,7 @@ function ReadingJournal() {
                         htmlFor="book-total-pages"
                         className="mb-2 block text-sm text-ink">
                             Total pages
-                            <span className="ml-2 text-clay-dark text-xs">(required)</span>
+                        
                         </label>
 
                         <input 
@@ -385,147 +389,178 @@ function ReadingJournal() {
                                             Nothing on this shelf just yet.
                                         </p>    
                                     ) : (
-                                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                       <div className="grid gap-5 md:grid-cols-2">
                                             {shelfBook.map((book) => (
                                                 <article 
                                                    key={book.id}
-                                                   className="group rounded-2xl border border-paper-border bg-paper-card p-5 transition duration-200 hover:-translate-y-1 hover:shadow-md">
-                                                   <div className="mb-4 flex items-start justify-between gap-3">
-                                                        <div className="flex h-28 w-20 shrink-0 items-center justify-center rounded-md bg-forest px-2 text-center shadow-sm">
-                                                            <div>
-                                                                <BookOpen size={20} className="mx-auto mb-2 text-clay"/>
-                                                                <p className="line-clamp-3 font-display text-sm text-paper">
-                                                                    {book.title}
+                                                   className="group overflow-hidden rounded-3xl border border-paper-border bg-paper-card shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+                                                    <div className="flex flex-col sm:flex-row">
+                                                        <div className="relative flex min-h-[250px] w-full shrink-0 items-center justify-center overflow-hidden bg-forest p-5 sm:min-h-[180px] sm:w-40">
+                                                            <div className="absolute inset-3 rounded-xl border border-white/20" />
+                                                            <div className="absolute left-6 top-6 h-10 w-10 rounded-full border border-clay/50"/>
+                                                            <div className="relative z-10 flex h-full w-full flex-col items-center justify-between text-center">
+                                                                <p className="text-[9px] uppercase tracking-[0.35em] text-paper/60">
+                                                                    A story to remember
+                                                                </p>
+                                                                <div className=" px-2">
+                                                                    <BookOpen 
+                                                                       size={27}
+                                                                       className="mx-auto mb-5 text-clay"
+                                                                       strokeWidth={1.2}/>
+                                                                    <h3 className="font-display text-2xl leading-tight text-paper">
+                                                                        {book.title}
+                                                                    </h3>
+                                                                    <div className="mx-auto my-4 h-px w-12 bg-clay/70" />
+                                                                    <p className="text-[10px] uppercase tracking-[0.2em] text-paper/70">
+                                                                        {book.author}
+                                                                    </p>
+                                                                </div>
+                                                                <p className="text-[9px] tracking-[0.25em] text-paper/50">
+                                                                    INK & SOUL LIBRARY 
                                                                 </p>
                                                             </div>
                                                         </div>
+                                                        <div className="flex min-w-0 flex-1 flex-col p-5 sm:p-5">
+                                                            <div className="flex items-start justify-between gap-4">
+                                                                <div className="min-w-0">
+                                                                    <span 
+                                                                       className={`inline-flex rounded-full px-3 py-1 text-[10px] font-medium tracking-wide ${
+                                                                          book.status === 'Finished'
+                                                                          ? 'bg-sage text-sage-ink'
+                                                                          : book.status === 'Currently Reading'
+                                                                             ? 'bg-[#F0E5D8] text-[#8A6045]'
+                                                                             : 'bg-[#EAE7DD] text-[#77715F]'
+                                                                       }`}>
+                                                                        {book.status}
+                                                                       </span>
+                                                                       <h3 className="mt-3 break-words font-display text-2xl text-ink sm:text-3xl">
+                                                                          {book.title}
+                                                                       </h3>
+                                                                       <p className="mt-1 text-sm text-ink-muted">
+                                                                            Written by {book.author}
+                                                                       </p>
+                                                                </div>
+                                                                <button 
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const confirmed = window.confirm(
+                                                                            `Remove "${book.title}" from your library?`)
+                                                                        if (confirmed) {
+                                                                            handleDelete(book.id)
+                                                                    }
+                                                                }}
+                                                                aria-label={`Delete ${book.title}`}
+                                                                className="shrink-0 rounded-xl p-2.5 text-ink-muted transition hover:bg:bg-red-50 hover:text-red-600">
+                                                                    <Trash2 size={18} />
 
-                                                        <button 
-                                                            type="button"
-                                                            onClick={() => {
-                                                                const confirmed = window.confirm(
-                                                                    `Remove "${book.title}" from your library?`
-                                                                )
-                                                                if (confirmed) {
-                                                                    handleDelete(book.id)
-                                                                }
-                                                            }}
-                                                            aria-label={`Delete ${book.title}`}
-                                                            className="rounded-lg p-2 text-ink-muted transition hover:bg-red-50 hover:text-red-700">
-                                                                <Trash2 size={17} />
-
-                                                            </button>
-                                                   </div>
-
-                                                   <h4 className="font-display text-xl text-ink">
-                                                        {book.title}
-                                                   </h4>
-
-                                                   <p className="mt-1 text-sm text-ink-muted">
-                                                        by {book.author}
-                                                   </p>
-
-                                                   <div className="mt-5">
-                                                        <div className="mb-2 flex items-center justify-between gap-2">
-                                                            <span className="text-xs text-ink-muted">
-                                                                Reading progress 
-                                                            </span>
-
-                                                            <span className="text-xs font-medium text-sage-ink">
-                                                                {getProgress(book)}%
-                                                            </span>
-                                                        </div>
-
-                                                        <div className="h-2 overflow-hidden rounded-full bg-sage/40"
-                                                             role="progressbar"
-                                                             aria-label={`Reading progress for ${book.title}`}
-                                                             aria-valuemin={0}
-                                                             aria-valuemax={100}
-                                                             aria-valuenow={getProgress(book)}
-                                                        >
-                                                            <div className="h-full rounded-full bg-sage-ink transition-all duration-300"
-                                                                 style={{ width: `${getProgress(book)}%` }} />
-
-                                                        </div>
-
-                                                        <p className="mt-2 text-xs text-ink-muted">
-                                                            {book.pagesRead ?? 0} of {book.totalPages ?? 0} pages
-                                                        </p>
-
-                                                        <div className="mt-3 grid grid-cols-2 gap-3">
-                                                            <div>
-                                                                <label  
-                                                                     htmlFor={`pages-read-${book.id}`}
-                                                                     className="mb-1 block text-xs text-ink-muted">
-                                                                    Pages read 
-                                                                </label>
-
-                                                                <input 
-                                                                    id={`pages-read-${book.id}`}
-                                                                    type="number"
-                                                                    min="0"
-                                                                    max={book.totalPages || undefined}
-                                                                    step="1"
-                                                                    disabled={book.status === 'Finished'}
-                                                                    value={pagesInputs[book.id] ?? (book.pagesRead) ?? 0}
-                                                                    onChange={(event) => {
-                                                                        setPagesinputs((previous) => ({
-                                                                            ...previous,
-                                                                            [book.id]: event.target.value,
-                                                                        }))
-                                                                    }}
-                                                                    onBlur={async (event) => {
-                                                                        const value = event.currentTarget.value
-                                                                        await handleProgressChange(book, value)
-                                                                        setPagesinputs((previous) => {
-                                                                            const next = { ...previous }
-                                                                            delete next[book.id]
-                                                                            return next
-                                                                        })
-                                                                    }}
-                                                                    className="w-full rounded-lg border border-paper-border bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-sage-dark disabled:cursor-not-allowed disabled:opacity-50"
-                                                                />
-
+                                                                </button>
                                                             </div>
+                                                            <div className="mt-5">
+                                                                <div className="mb-3 flex items-end justify-between">
+                                                                    <div>
+                                                                        <p className="text-xs uppercase tracking-[0.16em] text-ink-muted">
+                                                                            Your reading journey
+                                                                        </p>
+                                                                        <p className="mt-1 font-display text-lg text-ink">
+                                                                            Reading progress
+                                                                        </p>
 
-                                                            <div>
-                                                                <span className="mb-1 block text-xs text-ink-muted">
-                                                                    Total pages
-                                                                </span>
-                                                                <p className="font-medium text-ink">
-                                                                    {book.totalPages} pages
+                                                                    </div>
+                                                                    <span className="font-display text-3xl text-sage-ink">
+                                                                        {getProgress(book)}%
+                                                                    </span>
+                                                                </div>
+                                                                <div 
+                                                                    className="h-2 overflow-hidden rounded-full bg-sage/40"
+                                                                    role="progressbar"
+                                                                    aria-label={`Reading progress for ${book.title}`}
+                                                                    aria-valuemin={0}
+                                                                    aria-valuemax={100}
+                                                                    aria-valuenow={getProgress(book)}>
+                                                                        <div 
+                                                                           className="h-full rounded-full bg-sage-ink transition-all duration-500"
+                                                                           style={{
+                                                                                width: `${getProgress(book)}%`
+                                                                           }}/>
+                                                                    </div>
+                                                                    <p className="mt-2 text-xs text-ink-muted">
+                                                                        {book.pagesRead ?? 0} of {book.totalPages ?? 0} pages completed
+                                                                    </p>
+                                                            </div>
+                                                            <div className="mt-4 grid grid-cols-2 gap-4 rounded-2xl bg-paper p-3.5">
+                                                                <div>
+                                                                    <label
+                                                                        htmlFor={`pages-read-${book.id}`}
+                                                                        className="mb-2 block text-xs text-ink-muted">
+                                                                            Pages read
+                                                                        </label>
+                                                                        <input
+                                                                            id={`pages-read-${book.id}`}
+                                                                            type="number"
+                                                                            min="0"
+                                                                            max={book.totalPages || undefined}
+                                                                            step="1"
+                                                                            disabled={book.status === 'Finished'}
+                                                                            value={pagesInputs[book.id] ?? (book.pagesRead ?? 0)}
+                                                                            onChange={(event) => {
+                                                                                setPagesinputs((previous) => ({
+                                                                                     ...previous,
+                                                                                     [book.id]: event.target.value,
+                                                                            }))
+                                                                        }}
+                                                                        onBlur={async (event) => {
+                                                                            const value = event.currentTarget.value
+                                                                            await handleProgressChange(book, value)
+                                                                            setPagesinputs((previous) => {
+                                                                                const next = { ...previous }
+                                                                                delete next[book.id]
+                                                                                return next
+                                                                            })
+
+                                                                        }}
+                                                                        className="w-full rounded-lg border border-paper-border bg-paper-card px-3 py-2 text-sm text-ink outline-none transition focus:border-sage-dark disabled: cursor-not-allowed disabled:opacity-50"/>
+
+                                                                </div>
+                                                                <div>
+                                                                    <span className="mb-2 block text-xs text-ink-muted">
+                                                                        Total pages
+                                                                    </span>
+                                                                    <p className="py-2 font-display text-xl text-ink">
+                                                                        {book.totalPages}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mt-5 flex items-center justify-between gap-3 border-t border-paper-border pt-4">
+                                                                <p className="text-xs text-ink-muted">
+                                                                    Move to another shelf
                                                                 </p>
+                                                                <div className="relative">
+                                                                    <select 
+                                                                        aria-label={`Reading status for ${book.title}`}
+                                                                        value={book.status}
+                                                                        onChange={(event) => handleStatusChange(book, event.target.value)}
+                                                                        className="max-w-[165px] appearance-none rounded-xl border border-paper-border bg-paper px-3 py-2 pr-9 text-xs text-ink outline-none transition focus:border-sage-dark">
+                                                                            <option value="Want to Read">
+                                                                                Want to Read
+                                                                            </option>
+                                                                            <option value="Currently Reading">
+                                                                                Currently Reading 
+                                                                            </option>
+                                                                            <option value="Finished">
+                                                                                Finished 
+                                                                            </option>
+                                                                        </select>
+                                                                        <ChevronDown
+                                                                            size={14}
+                                                                            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted"/>
+
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                   </div>
-
-                                                   <div className="relative mt-4">
-                                                        <select 
-                                                            aria-label={`Reading status for ${book.title}`}
-                                                            value={book.status}
-                                                            onChange={(event) => handleStatusChange( book, event.target.value)}
-                                                            className="w-full appearance-none rounded-xl border border-paper-border bg-paper px-3 py-2 pr-9 text-xs text-ink outline-none transition focus:border-sage-dark">
-                                                                <option value="Want to Read">
-                                                                    Want to Read
-                                                                </option>
-
-                                                                <option value="Currently Reading">
-                                                                    Currently Reading
-                                                                </option>
-
-                                                                <option value="Finished">
-                                                                    Finished
-                                                                </option>
-                                                            </select>
-
-                                                            <ChevronDown
-                                                                size={15}
-                                                                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted"/>
-
-                                                   </div>
-                                                </article>
+                                                    </div>
+                                                   </article>
                                             ))}
-                                        </div>
+                                       </div>
                                     )
                                     }
                                 </section>

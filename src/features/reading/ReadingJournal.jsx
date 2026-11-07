@@ -6,6 +6,7 @@ import {
     getAllRecords,
     updateRecord,
 } from '../../services/db'
+import { searchBookCover } from '../../services/openLibrary'
 
 function ReadingJournal() {
     const [title, setTitle] = useState('')
@@ -16,6 +17,7 @@ function ReadingJournal() {
     const [loading, setLoading] = useState(true)
     const [message, setMessage] = useState('')
     const [pagesInputs, setPagesinputs] = useState({})
+    const [failedCovers, setFailedCovers] = useState({})
 
     useEffect(() => {
         async function loadBooks() {
@@ -50,6 +52,10 @@ function ReadingJournal() {
             setMessage('Total pages must be a whole number greater than 0.')
             return
         }
+        const cover = await searchBookCover(
+            title.trim(),
+            author.trim()
+        )
         const newBook = {
             id: crypto.randomUUID(),
             title: title.trim(),
@@ -57,6 +63,8 @@ function ReadingJournal() {
             status,
             totalPages: parsedTotalPages,
             pagesRead: status === 'Finished' ? parsedTotalPages : 0,
+            coverId: cover?.coverId ?? null,
+            coverUrl: cover?.coverUrl ?? null,
             createdAt: new Date().toISOString(),
         }
         try {
@@ -65,7 +73,7 @@ function ReadingJournal() {
             setTitle('')
             setAuthor('')
             setTotalPages('')
-            setStatus('Want to RSead')
+            setStatus('Want to Read')
             setMessage('Book added to your library.')
         }
         catch (error) {
@@ -395,30 +403,48 @@ function ReadingJournal() {
                                                    key={book.id}
                                                    className="group overflow-hidden rounded-3xl border border-paper-border bg-paper-card shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
                                                     <div className="flex flex-col sm:flex-row">
-                                                        <div className="relative flex min-h-[250px] w-full shrink-0 items-center justify-center overflow-hidden bg-forest p-5 sm:min-h-[180px] sm:w-40">
-                                                            <div className="absolute inset-3 rounded-xl border border-white/20" />
-                                                            <div className="absolute left-6 top-6 h-10 w-10 rounded-full border border-clay/50"/>
-                                                            <div className="relative z-10 flex h-full w-full flex-col items-center justify-between text-center">
-                                                                <p className="text-[9px] uppercase tracking-[0.35em] text-paper/60">
-                                                                    A story to remember
-                                                                </p>
-                                                                <div className=" px-2">
-                                                                    <BookOpen 
-                                                                       size={27}
-                                                                       className="mx-auto mb-5 text-clay"
-                                                                       strokeWidth={1.2}/>
-                                                                    <h3 className="font-display text-2xl leading-tight text-paper">
-                                                                        {book.title}
-                                                                    </h3>
-                                                                    <div className="mx-auto my-4 h-px w-12 bg-clay/70" />
-                                                                    <p className="text-[10px] uppercase tracking-[0.2em] text-paper/70">
-                                                                        {book.author}
+                                                        <div className="relative flex h-[300px] w-full shrink-0 items-center justify-center overflow-hidden bg-[#E9E1D7] sm:h-auto sm:min-h-[320px] sm:w-[34%]">
+                                                            {book.coverUrl && !failedCovers[book.id] ? (
+                                                                <img 
+                                                                    src={book.coverUrl}
+                                                                    alt={`Cover of ${book.title}`}
+                                                                    loading="lazy"
+                                                                    onError={() => {
+                                                                        setFailedCovers((previous) => ({
+                                                                            ...previous,
+                                                                            [book.id]: true,
+                                                                        }))
+                                                                    }}
+                                                                    className="absolute inset-0 h-full w-full object-contain p-3 sm:p-4"/>
+                                                            ) : (
+                                                                <div className="relative flex min-h-full w-full flex-col items-center justify-between overflow-hidden bg-forest p-5 text-center">
+                                                                    <div className="absolute inset-3 rounded-xl border border-white/20"/>
+                                                                    <div className="absolute left-6 top-6 h-10 w-10 rounded-full border border-clay/50"/>
+                                                                    <p className="relative z-10 text-[9px] uppercase tracking-[0.35em] text-paper/60">
+                                                                        A story to remember
+                                                                    </p>
+                                                                    <div className="relative z-10 px-2">
+                                                                        <BookOpen
+                                                                            size={27}
+                                                                            className="mx-auto mb-5 text-clay"
+                                                                            strokeWidth={1.2}
+                                                                        />
+                                                                        <h3 className="break-words font-diplay text-2xl leading-tight text-paper">
+                                                                            {book.title}
+                                                                        </h3>
+                                                                        <div className="mx-auto my-4 h-px w-12 bg-clay/70"/>
+                                                                        <p className="text-[10px] uppercase tracking-[0.2em] test-paper/70">
+                                                                            {book.author}
+                                                                        </p>
+                                                                    </div>
+                                                                    <p className="relative z-10 text-[9px] tracking-[0.25em] text-paper/50">
+                                                                        INK & SOUL LIBRARY
                                                                     </p>
                                                                 </div>
-                                                                <p className="text-[9px] tracking-[0.25em] text-paper/50">
-                                                                    INK & SOUL LIBRARY 
-                                                                </p>
-                                                            </div>
+                                                            )
+                                                            }
+                                                            
+                                                            
                                                         </div>
                                                         <div className="flex min-w-0 flex-1 flex-col p-5 sm:p-5">
                                                             <div className="flex items-start justify-between gap-4">
@@ -433,11 +459,13 @@ function ReadingJournal() {
                                                                        }`}>
                                                                         {book.status}
                                                                        </span>
-                                                                       <h3 className="mt-3 break-words font-display text-2xl text-ink sm:text-3xl">
-                                                                          {book.title}
-                                                                       </h3>
-                                                                       <p className="mt-1 text-sm text-ink-muted">
-                                                                            Written by {book.author}
+                                                                       <div className="mt-3 rounded-r-xl border-l-[3px] border-[#8D5965] bg-[#F3EAE7] px-3 py-2.5">
+                                                                            <h3 className="break-words font-display text-2xl leading-tight text-[#702D3B] sm:text-3xl">
+                                                                                {book.title}
+                                                                            </h3>
+                                                                       </div>
+                                                                       <p className="mt-2 text-sm text-ink-muted">
+                                                                            Written ny {book.author}
                                                                        </p>
                                                                 </div>
                                                                 <button 

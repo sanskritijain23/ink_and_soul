@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { BookOpen, Plus, Trash2, ChevronDown, Library, BookCheck, Bookmark } from "lucide-react"
+import { BookOpen, Plus, Trash2, Library, BookCheck, Bookmark } from "lucide-react"
 import {
     addRecord,
     deleteRecord,
@@ -403,48 +403,105 @@ function ReadingJournal() {
                                                    key={book.id}
                                                    className="group overflow-hidden rounded-3xl border border-paper-border bg-paper-card shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
                                                     <div className="flex flex-col sm:flex-row">
-                                                        <div className="relative flex h-[300px] w-full shrink-0 items-center justify-center overflow-hidden bg-[#E9E1D7] sm:h-auto sm:min-h-[320px] sm:w-[34%]">
-                                                            {book.coverUrl && !failedCovers[book.id] ? (
-                                                                <img 
-                                                                    src={book.coverUrl}
-                                                                    alt={`Cover of ${book.title}`}
-                                                                    loading="lazy"
-                                                                    onError={() => {
-                                                                        setFailedCovers((previous) => ({
+                                                        <div className="flex w-full shrink-0 flex-col bg-[#E9E1D7] sm:w-[34%]">
+                                                            <div className="relative overflow-hidden px-3 pt-3">
+                                                                <div className="relative aspect-[2/3] w-full overflow-hidden rounded-2xl bg-[#DED4C8] shadow-sm">
+
+                                                                    {book.coverUrl && !failedCovers[book.id] ? (
+                                                                    <img
+                                                                        src={book.coverUrl}
+                                                                        alt={`Cover of ${book.title}`}
+                                                                        loading="lazy"
+                                                                        onError={() => {
+                                                                            setFailedCovers((previous) => ({
                                                                             ...previous,
                                                                             [book.id]: true,
                                                                         }))
-                                                                    }}
-                                                                    className="absolute inset-0 h-full w-full object-contain p-3 sm:p-4"/>
-                                                            ) : (
-                                                                <div className="relative flex min-h-full w-full flex-col items-center justify-between overflow-hidden bg-forest p-5 text-center">
-                                                                    <div className="absolute inset-3 rounded-xl border border-white/20"/>
-                                                                    <div className="absolute left-6 top-6 h-10 w-10 rounded-full border border-clay/50"/>
-                                                                    <p className="relative z-10 text-[9px] uppercase tracking-[0.35em] text-paper/60">
-                                                                        A story to remember
-                                                                    </p>
-                                                                    <div className="relative z-10 px-2">
-                                                                        <BookOpen
-                                                                            size={27}
-                                                                            className="mx-auto mb-5 text-clay"
-                                                                            strokeWidth={1.2}
-                                                                        />
-                                                                        <h3 className="break-words font-diplay text-2xl leading-tight text-paper">
-                                                                            {book.title}
-                                                                        </h3>
-                                                                        <div className="mx-auto my-4 h-px w-12 bg-clay/70"/>
-                                                                        <p className="text-[10px] uppercase tracking-[0.2em] test-paper/70">
-                                                                            {book.author}
-                                                                        </p>
+                                                                        }}
+                                                                        className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="relative flex h-full w-full flex-col items-center justify-between overflow-hidden bg-forest px-4 py-5 text-center">
+                                                                        <div className="absolute inset-3 rounded-xl border border-paper/20" />
+                                                                        <div className="absolute inset-5 rounded-lg border border-clay/20" />
+                                                                        <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full border border-clay/20" />
+                                                                        <div className="absolute -bottom-10 -left-10 h-28 w-28 rounded-full border border-paper/10" />
+                                                                            <div className="relative z-10">
+                                                                                <p className="text-[8px] uppercase tracking-[0.35em] text-paper/55">
+                                                                                    A story to remember
+                                                                                </p>
+                                                                            </div>
+
+                                                                            <div className="relative z-10 px-2">
+                                                                                <BookOpen
+                                                                                    size={28}
+                                                                                    className="mx-auto mb-4 text-clay"
+                                                                                    strokeWidth={1.2}
+                                                                                />
+
+                                                                                <h3 className="break-words font-display text-xl leading-tight text-paper sm:text-2xl">
+                                                                                    {book.title}
+                                                                                </h3>
+
+                                                                                <div className="mx-auto my-3 h-px w-10 bg-clay/70" />
+
+                                                                                    <p className="break-words text-[9px] uppercase tracking-[0.18em] text-paper/65">
+                                                                                        {book.author}
+                                                                                    </p>
+                                                                                </div>
+
+                                                                                <p className="relative z-10 text-[8px] tracking-[0.25em] text-paper/40">
+                                                                                    INK & SOUL
+                                                                                </p>
+                                                                            </div>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
-                                                                    <p className="relative z-10 text-[9px] tracking-[0.25em] text-paper/50">
-                                                                        INK & SOUL LIBRARY
-                                                                    </p>
+
+                                                                    <div className="px-3 pb-3 pt-3">
+                                                                        <p className="mb-2 px-1 text-[9px] font-medium uppercase tracking-[0.22em] text-ink-muted">
+                                                                            Reading shelf
+                                                                        </p>
+
+                                                                        <div className="space-y-1.5">
+                                                                            {[
+                                                                                'Want to Read',
+                                                                                'Currently Reading',
+                                                                                'Finished',
+                                                                            ].map((option) => {
+                                                                            const isSelected = book.status === option
+
+                                                                            return (
+                                                                            <button
+                                                                                key={option}
+                                                                                type="button"
+                                                                                onClick={() => handleStatusChange(book, option)}
+                                                                                className={`group/status flex w-full items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left text-[11px] transition-all duration-200 ${
+                                                                                isSelected
+                                                                                ? 'border-sage-dark bg-sage text-sage-ink shadow-sm'
+                                                                                : 'border-transparent bg-paper/50 text-ink-muted hover:border-paper-border hover:bg-paper hover:text-ink'
+                                                                            }`}
+                                                                            >
+                                                                                <span
+                                                                                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition ${
+                                                                                    isSelected
+                                                                                    ? 'border-sage-ink bg-sage-ink'
+                                                                                    : 'border-[#CFC7B9] bg-paper-card'
+                                                                                    }`}
+                                                                                >
+                                                                                    {isSelected && (
+                                                                                    <span className="h-1.5 w-1.5 rounded-full bg-paper-card" />
+                                                                                    )}
+                                                                                </span>
+
+                                                                                <span className={isSelected ? 'font-medium' : ''}>
+                                                                                    {option}
+                                                                                </span>
+                                                                            </button>
+                                                                            )
+                                                                            })}
+                                                                        </div>
                                                                 </div>
-                                                            )
-                                                            }
-                                                            
-                                                            
                                                         </div>
                                                         <div className="flex min-w-0 flex-1 flex-col p-5 sm:p-5">
                                                             <div className="flex items-start justify-between gap-4">
@@ -558,32 +615,8 @@ function ReadingJournal() {
                                                                     </p>
                                                                 </div>
                                                             </div>
-                                                            <div className="mt-5 flex items-center justify-between gap-3 border-t border-paper-border pt-4">
-                                                                <p className="text-xs text-ink-muted">
-                                                                    Move to another shelf
-                                                                </p>
-                                                                <div className="relative">
-                                                                    <select 
-                                                                        aria-label={`Reading status for ${book.title}`}
-                                                                        value={book.status}
-                                                                        onChange={(event) => handleStatusChange(book, event.target.value)}
-                                                                        className="max-w-[165px] appearance-none rounded-xl border border-paper-border bg-paper px-3 py-2 pr-9 text-xs text-ink outline-none transition focus:border-sage-dark">
-                                                                            <option value="Want to Read">
-                                                                                Want to Read
-                                                                            </option>
-                                                                            <option value="Currently Reading">
-                                                                                Currently Reading 
-                                                                            </option>
-                                                                            <option value="Finished">
-                                                                                Finished 
-                                                                            </option>
-                                                                        </select>
-                                                                        <ChevronDown
-                                                                            size={14}
-                                                                            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted"/>
-
-                                                                </div>
-                                                            </div>
+                                                            
+                                                            
                                                         </div>
                                                     </div>
                                                    </article>
